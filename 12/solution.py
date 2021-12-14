@@ -22,23 +22,33 @@ class Node:
         )
 
 
-def search(node: Node, visited: Set[Node] = None) -> int:
+def search(node: Node, visited: Set[Node] = None, visited_twice: Set[Node] = None) -> int:
     if not visited:
         visited = set()
+
+    if not visited_twice:
+        visited_twice = set()
 
     if node.name == "end":
         return 1
 
     if not node.big and node in visited:
-        return 0
+        if len(visited_twice) == 1:
+            return 0
 
-    visited.add(node)
+    if not node.big and node in visited:
+        visited_twice.add(node)
+    else:
+        visited.add(node)
 
     num_paths = 0
     for neighbour in node.adjacent:
-        num_paths += search(neighbour, visited)
+        num_paths += search(neighbour, visited, visited_twice)
 
-    visited.discard(node)
+    if node in visited_twice:
+        visited_twice.discard(node)
+    else:
+        visited.discard(node)
 
     return num_paths
 
