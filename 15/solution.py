@@ -1,5 +1,6 @@
 import sys
 import heapq
+from copy import deepcopy
 from typing import List, Optional
 from dataclasses import dataclass, field
 
@@ -37,6 +38,30 @@ def get_h(src: Node, dst: Node) -> int:
     return abs(src.x - dst.x) + abs(src.y - dst.y)
 
 
+def expand_grid(grid: List[List[Node]], iterations: int) -> List[List[Node]]:
+    grid_copy = deepcopy(grid)
+
+    for i in range(iterations):
+        for row in range(len(grid)):
+            for col in range(len(grid[0])):
+                new_risk = grid[row][col].risk + i + 1
+                if new_risk > 9:
+                    new_risk = new_risk - 9
+                grid_copy[row].append(Node(x=((i+1)*len(grid[0]))+col, y=row, risk=new_risk))
+
+    for i in range(iterations):
+        for row in range(len(grid)):
+            new_row: List[Node] = []
+            for node in grid_copy[row]:
+                new_risk = grid_copy[node.y][node.x].risk + i + 1
+                if new_risk > 9:
+                    new_risk = new_risk - 9
+                new_row.append(Node(x=node.x, y=(i+1)*len(grid)+node.y, risk=new_risk))
+            grid_copy.append(new_row)
+
+    return grid_copy
+
+
 def main():
     grid: List[List[Node]] = []
 
@@ -49,6 +74,8 @@ def main():
                 new_node = Node(x, y, int(lines[y][x]))
                 row.append(new_node)
             grid.append(row)
+
+    grid = expand_grid(grid, 4)
 
     source = grid[0][0]
     destination = grid[len(grid) - 1][len(grid[0]) - 1]
